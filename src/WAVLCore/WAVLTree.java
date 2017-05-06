@@ -168,28 +168,51 @@ public class WAVLTree {
      * (It must implement IWAVLNode)
      */
     public class WAVLNode implements IWAVLNode{
+
+        private IWAVLNode rightChild;
+        private IWAVLNode leftChild;
+        private String info;
+        private int key;
+
+        private WAVLNode(int key, String info, WAVLNode rightChild, WAVLNode leftChild) {
+            this.rightChild = rightChild;
+            this.leftChild = leftChild;
+            this.info = info;
+            this.key = key;
+        }
+
         public int getKey()
         {
-            return 42; // to be replaced by student code
+            if (isRealNode()) {
+                return this.key;
+            }
+            else {
+                return -1;
+            }
         }
         public String getValue()
         {
-            return null; // to be replaced by student code
+            if (isRealNode()) {
+                return this.info;
+            }
+            else {
+                return null;
+            }
         }
         public IWAVLNode getLeft()
         {
-            return null; // to be replaced by student code
+            return this.leftChild;
         }
         public IWAVLNode getRight()
         {
-            return null; // to be replaced by student code
+            return this.rightChild;
         }
         // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
         public boolean isRealNode()
         {
-            return true; // to be replaced by student code
+            return this.rightChild != null && this.leftChild != null;
         }
-
+        // TODO: Implement
         public int getSubtreeSize()
         {
             return 42; // to be replaced by student code
