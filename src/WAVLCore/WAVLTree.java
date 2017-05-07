@@ -1,5 +1,7 @@
 package WAVLCore;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 /**
  *
  * WAVLTree
@@ -11,14 +13,16 @@ package WAVLCore;
 
 public class WAVLTree {
 
+    private IWAVLNode root = null;
     /**
      * public boolean empty()
      *
      * returns true if and only if the tree is empty
      *
      */
+
     public boolean empty() {
-        return false; // to be replaced by student code
+        return root == null;
     }
 
     /**
@@ -29,7 +33,17 @@ public class WAVLTree {
      */
     public String search(int k)
     {
-        return "42";  // to be replaced by student code
+        IWAVLNode currentNode = root;
+
+        while( currentNode.isRealNode() )
+            if( currentNode.getKey() < k )
+                currentNode = currentNode.getLeft();
+            else if( currentNode.getKey() < k )
+                currentNode = currentNode.getRight();
+            else
+                return currentNode.getValue(); // Match
+
+        return null; // No match
     }
 
     /**
@@ -41,7 +55,13 @@ public class WAVLTree {
      * returns -1 if an item with key k already exists in the tree.
      */
     public int insert(int k, String i) {
-        return 42;	// to be replaced by student code
+
+        if (empty()) {
+            root = new WAVLNode(k, i, null, null);
+            return 0;
+        } else {
+
+        }
     }
 
     /**
@@ -65,7 +85,16 @@ public class WAVLTree {
      */
     public String min()
     {
-        return "42"; // to be replaced by student code
+        if (empty()) {
+            return null;
+        }
+        else {
+            IWAVLNode node = root;
+            while (node.getLeft() != null) {
+                node = node.getLeft();
+            }
+            return node.getValue();
+        }
     }
 
     /**
@@ -76,8 +105,40 @@ public class WAVLTree {
      */
     public String max()
     {
-        return "42"; // to be replaced by student code
+        if (empty()) {
+            return null;
+        }
+        else {
+            IWAVLNode node = root;
+            while (node.getRight() != null) {
+                node = node.getRight();
+            }
+            return node.getValue();
+        }
     }
+
+    private IWAVLNode[] inOrderTraversal() {
+
+        if (empty()) {
+            return new IWAVLNode[0];
+        }
+
+        return recursiveInOrderTraversal(new IWAVLNode[size()], root, 0);
+    }
+
+    private IWAVLNode[] recursiveInOrderTraversal(IWAVLNode[] insertedNodes, IWAVLNode node, int numInsertedNodes) {
+        if (!node.isRealNode()) {
+            return insertedNodes;
+        }
+
+        insertedNodes = recursiveInOrderTraversal(insertedNodes, node.getLeft(), numInsertedNodes);
+        numInsertedNodes += 1;
+        insertedNodes[numInsertedNodes] = node;
+        insertedNodes = recursiveInOrderTraversal(insertedNodes, node.getRight(), numInsertedNodes);
+
+        return insertedNodes;
+    }
+
 
     /**
      * public int[] keysToArray()
@@ -87,8 +148,12 @@ public class WAVLTree {
      */
     public int[] keysToArray()
     {
-        int[] arr = new int[42]; // to be replaced by student code
-        return arr;              // to be replaced by student code
+        IWAVLNode[] nodes = inOrderTraversal();
+        int[] keys = new int[nodes.length];
+        for (int i = 0; i<nodes.length; i++) {
+            keys[i] = nodes[i].getKey();
+        }
+        return keys;
     }
 
     /**
@@ -100,8 +165,12 @@ public class WAVLTree {
      */
     public String[] infoToArray()
     {
-        String[] arr = new String[42]; // to be replaced by student code
-        return arr;                    // to be replaced by student code
+        IWAVLNode[] nodes = inOrderTraversal();
+        String[] info = new String[nodes.length];
+        for (int i = 0; i<nodes.length; i++) {
+            info[i] = nodes[i].getValue();
+        }
+        return info;
     }
 
     /**
@@ -114,7 +183,7 @@ public class WAVLTree {
      */
     public int size()
     {
-        return 42; // to be replaced by student code
+        return root.getSubtreeSize();
     }
 
     /**
@@ -127,7 +196,7 @@ public class WAVLTree {
      */
     public IWAVLNode getRoot()
     {
-        return null;
+        return root;
     }
     /**
      * public int select(int i)
@@ -142,9 +211,21 @@ public class WAVLTree {
      */
     public String select(int i)
     {
-        return null;
+        return recursiveSelect(root, i).getValue();
     }
 
+    private IWAVLNode recursiveSelect(IWAVLNode node, int i) {
+        int r = node.getLeft().getSubtreeSize();
+        if (i == r) {
+            return node;
+        }
+        else if (i < r) {
+            return recursiveSelect(node.getLeft(), i);
+        }
+        else {
+            return recursiveSelect(node.getRight(), i-r-1);
+        }
+    }
     /**
      * public interface IWAVLNode
      * ! Do not delete or modify this - otherwise all tests will fail !
@@ -167,16 +248,43 @@ public class WAVLTree {
      * This class can and must be modified.
      * (It must implement IWAVLNode)
      */
-    public class WAVLNode implements IWAVLNode{
+
+    // TODO: NOTE: i changed the modifier to static
+
+    static class WAVLNode implements IWAVLNode{
 
         private IWAVLNode rightChild;
         private IWAVLNode leftChild;
         private String info;
-        private int key;
+        private Integer key;
+        private Integer subTreeSize = 0;
 
-        private WAVLNode(int key, String info, WAVLNode rightChild, WAVLNode leftChild) {
-            this.rightChild = rightChild;
-            this.leftChild = leftChild;
+        private static WAVLNode externalLeaf = new WAVLNode();
+
+        /**
+         * For external leafs only. This cannot be private since no static vars can be stored in WAVLNode
+         */
+        private WAVLNode() {}
+
+        public WAVLNode(Integer key, String info, WAVLNode rightChild, WAVLNode leftChild) {
+
+            if (key == null) {
+                throw new IllegalArgumentException("Key cloud not be null");
+            }
+
+            if (rightChild == null) {
+                this.rightChild = WAVLNode.externalLeaf;
+            }
+            else {
+                this.rightChild = rightChild;
+            }
+            if (leftChild == null) {
+                this.leftChild = WAVLNode.externalLeaf;
+            }
+            else {
+                this.leftChild = leftChild;
+            }
+
             this.info = info;
             this.key = key;
         }
@@ -210,12 +318,14 @@ public class WAVLTree {
         // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
         public boolean isRealNode()
         {
-            return this.rightChild != null && this.leftChild != null;
+            return this.key == null;
         }
+
         // TODO: Implement
+
         public int getSubtreeSize()
         {
-            return 42; // to be replaced by student code
+            return subTreeSize;
         }
     }
 
