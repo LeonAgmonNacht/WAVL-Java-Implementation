@@ -59,8 +59,38 @@ public class WAVLTree {
         if (empty()) {
             root = new WAVLNode(k, i, null, null);
             return 0;
-        } else {
+        }
 
+        return recursiveInsert(root, new WAVLNode(k, i, null, null)).rotationsNeeded;
+    }
+
+    private InsertReturnType recursiveInsert(IWAVLNode tree, IWAVLNode newNode) {
+
+        int k = newNode.getKey();
+        int tk = tree.getKey();
+
+        if (k < tk) {
+            if (tree.getLeft().isRealNode()) {
+                recursiveInsert(tree.getLeft(), newNode);
+            } else {
+                tree.setLeft(newNode);
+            }
+            // TODO: should we check if this is a 2,2 node???
+            if (tree.getLeft().getRank() - tree.getRight().getRank() == 2) { // Left is deeper, need rotation
+
+                // Need Rotation. check states
+            }
+        } else if (k > tk) {
+            if (tree.getRight().isRealNode()) {
+                recursiveInsert(tree.getRight(), newNode);
+            } else {
+                tree.setLeft(newNode);
+            }
+            // TODO: should we check if this is a 2,2 node???
+            if (tree.getRight().getRank() - tree.getLeft().getRank() == 2) { // Right is deeper, need rotation
+
+                // Need rotation. check states
+            }
         }
     }
 
@@ -283,7 +313,7 @@ public class WAVLTree {
         public int getSubtreeSize(); // Returns the number of real nodes in this node's subtree (Should be implemented in O(1))
         public void setLeft(IWAVLNode leftChild);
         public void setRight(IWAVLNode rightChild);
-        public void setSubTreeSize(Integer subTreeSize);
+        public int getRank();
 
     }
 
@@ -305,10 +335,10 @@ public class WAVLTree {
         private IWAVLNode leftChild;
         private String info;
         private Integer key;
-        private Integer subTreeSize = 0;
+        private Integer subTreeSize;
+        private Integer rank;
 
         private static WAVLNode externalLeaf = new WAVLNode();
-
         /**
          * For external leafs only. This cannot be private since no static vars can be stored in WAVLNode
          */
@@ -376,6 +406,10 @@ public class WAVLTree {
             return subTreeSize;
         }
 
+        public int getRank() {
+            return this.rank;
+        }
+
         public void setRight(IWAVLNode rightChild) {
             this.setSubTreeSize(this.getSubtreeSize() - this.getRight().getSubtreeSize());
             this.rightChild = rightChild;
@@ -390,6 +424,18 @@ public class WAVLTree {
 
         public void setSubTreeSize(Integer subTreeSize) {
             this.subTreeSize = subTreeSize;
+        }
+
+    }
+
+    private class InsertReturnType {
+
+        public int rotationsNeeded;
+        public IWAVLNode resultNode;
+
+        public InsertReturnType(IWAVLNode resultNode, int rotationsNeeded) {
+            this.rotationsNeeded = rotationsNeeded;
+            this.resultNode = resultNode;
         }
     }
 
