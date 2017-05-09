@@ -138,8 +138,6 @@ public class WAVLTree {
                 node = node.getLeft();
             }
             return node.getValue();
-
-            // TODO: Don't forget when you first insert a node to set it's subtreeSize!!!
         }
     }
 
@@ -337,6 +335,7 @@ public class WAVLTree {
 
             this.info = info;
             this.key = key;
+            this.subTreeSize = rightChild.getSubtreeSize() + leftChild.getSubtreeSize() + 1;
         }
 
         public int getKey()
