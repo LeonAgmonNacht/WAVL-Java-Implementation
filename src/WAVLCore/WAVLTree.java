@@ -77,6 +77,50 @@ public class WAVLTree {
         return 42;	// to be replaced by student code
     }
 
+    // Rotation Methods:
+
+    /**
+     * Performing a rotation with the left child of node.
+     * @return The new node(tree) after the rotation
+     */
+    private IWAVLNode leftRotate(IWAVLNode node) {
+        IWAVLNode tempNode = node.getRight();
+        node.setRight(tempNode.getLeft());
+        tempNode.setLeft(node);
+
+        return tempNode;
+    }
+
+    /**
+     * Performing a rotation with the right child of node.
+     * @return The new node(tree) after the rotation
+     */
+    private IWAVLNode rightRotate(IWAVLNode node) {
+        IWAVLNode tempNode = node.getLeft();
+        node.setLeft(tempNode.getRight());
+        tempNode.setRight(node);
+
+        return tempNode;
+    }
+    /**
+     * Performing a double rotation with left child.
+     * @return The new node(tree) after the rotation
+     */
+    private IWAVLNode doubleRotateWithLeftChild( IWAVLNode node )
+    {
+        node.setLeft(rightRotate(node.getLeft()));
+        return leftRotate(node);
+    }
+    /**
+     * Performing a double rotation with right child.
+     * @return The new node(tree) after the rotation
+     */
+    private IWAVLNode doubleRotateWithRightChild( IWAVLNode node )
+    {
+        node.setRight(leftRotate(node.getRight()));
+        return rightRotate(node);
+    }
+
     /**
      * public String min()
      *
@@ -94,6 +138,8 @@ public class WAVLTree {
                 node = node.getLeft();
             }
             return node.getValue();
+
+            // TODO: Don't forget when you first insert a node to set it's subtreeSize!!!
         }
     }
 
@@ -237,6 +283,10 @@ public class WAVLTree {
         public IWAVLNode getRight(); //returns right child (if there is no right child return null)
         public boolean isRealNode(); // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
         public int getSubtreeSize(); // Returns the number of real nodes in this node's subtree (Should be implemented in O(1))
+        public void setLeft(IWAVLNode leftChild);
+        public void setRight(IWAVLNode rightChild);
+        public void setSubTreeSize(Integer subTreeSize);
+
     }
 
     /**
@@ -315,17 +365,32 @@ public class WAVLTree {
         {
             return this.rightChild;
         }
+
         // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
         public boolean isRealNode()
         {
             return this.key == null;
         }
 
-        // TODO: Implement
-
         public int getSubtreeSize()
         {
             return subTreeSize;
+        }
+
+        public void setRight(IWAVLNode rightChild) {
+            this.setSubTreeSize(this.getSubtreeSize() - this.getRight().getSubtreeSize());
+            this.rightChild = rightChild;
+            this.setSubTreeSize(this.getSubtreeSize() + this.getRight().getSubtreeSize());
+        }
+
+        public void setLeft(IWAVLNode leftChild) {
+            this.setSubTreeSize(this.getSubtreeSize() - this.getLeft().getSubtreeSize());
+            this.leftChild = leftChild;
+            this.setSubTreeSize(this.getSubtreeSize() + this.getLeft().getSubtreeSize())
+        }
+
+        public void setSubTreeSize(Integer subTreeSize) {
+            this.subTreeSize = subTreeSize;
         }
     }
 
