@@ -11,6 +11,8 @@ public class Tester {
 
         // Preform tests:
 
+        tree.insert(5, "5");
+        tree.insert(6, "6");
 
     }
 }

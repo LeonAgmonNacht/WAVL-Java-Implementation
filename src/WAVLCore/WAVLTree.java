@@ -58,39 +58,63 @@ public class WAVLTree {
 
         if (empty()) {
             root = new WAVLNode(k, i, null, null);
+            System.out.println("Setting New Root");
             return 0;
         }
-
-        return recursiveInsert(root, new WAVLNode(k, i, null, null)).rotationsNeeded;
+        return recursiveInsert(root, new WAVLNode(k, i, null, null));
     }
 
-    private InsertReturnType recursiveInsert(IWAVLNode tree, IWAVLNode newNode) {
+    private int recursiveInsert(IWAVLNode tree, IWAVLNode newNode) {
+
+        System.out.println("Calling Recursive Insert: " + (new Integer(newNode.getKey()).toString()) + " With root: " + (new Integer(tree.getKey())).toString());
 
         int k = newNode.getKey();
         int tk = tree.getKey();
 
         if (k < tk) {
+            int numRotationsNeeded = 0;
+
             if (tree.getLeft().isRealNode()) {
-                recursiveInsert(tree.getLeft(), newNode);
+                numRotationsNeeded = recursiveInsert(tree.getLeft(), newNode);
             } else {
                 tree.setLeft(newNode);
             }
-            // TODO: should we check if this is a 2,2 node???
             if (tree.getLeft().getRank() - tree.getRight().getRank() == 2) { // Left is deeper, need rotation
 
-                // Need Rotation. check states
+                // Need Rotation:
+                if (k < tree.getLeft().getKey()) {
+                    rightRotate(tree);
+                    numRotationsNeeded += 1;
+                } else {
+                    doubleRotateWithRightChild(tree);
+                    numRotationsNeeded += 2;
+                }
             }
+            return numRotationsNeeded;
         } else if (k > tk) {
+            int numRotationsNeeded = 0;
+
             if (tree.getRight().isRealNode()) {
-                recursiveInsert(tree.getRight(), newNode);
+                numRotationsNeeded = recursiveInsert(tree.getRight(), newNode);
             } else {
-                tree.setLeft(newNode);
+                tree.setRight(newNode);
             }
-            // TODO: should we check if this is a 2,2 node???
             if (tree.getRight().getRank() - tree.getLeft().getRank() == 2) { // Right is deeper, need rotation
 
-                // Need rotation. check states
+                // Need Rotation:
+                if (k > tree.getRight().getKey()) {
+                    leftRotate(tree);
+                    numRotationsNeeded += 1;
+                } else {
+                    doubleRotateWithRightChild(tree);
+                    numRotationsNeeded += 2;
+                }
             }
+
+            return numRotationsNeeded;
+        }
+        else { // Already existing:
+            return 0;
         }
     }
 
@@ -327,8 +351,6 @@ public class WAVLTree {
      * (It must implement IWAVLNode)
      */
 
-    // TODO: NOTE: i changed the modifier to static
-
     static class WAVLNode implements IWAVLNode{
 
         private IWAVLNode rightChild;
@@ -340,9 +362,12 @@ public class WAVLTree {
 
         private static WAVLNode externalLeaf = new WAVLNode();
         /**
-         * For external leafs only. This cannot be private since no static vars can be stored in WAVLNode
+         * For external leafs only.
          */
-        private WAVLNode() {}
+        private WAVLNode() {
+            this.rank = -1;
+            this.subTreeSize = 0;
+        }
 
         public WAVLNode(Integer key, String info, WAVLNode rightChild, WAVLNode leftChild) {
 
@@ -365,7 +390,8 @@ public class WAVLTree {
 
             this.info = info;
             this.key = key;
-            this.subTreeSize = rightChild.getSubtreeSize() + leftChild.getSubtreeSize() + 1;
+            this.subTreeSize = this.rightChild.getSubtreeSize() + this.leftChild.getSubtreeSize() + 1;
+            this.rank = max(this.rightChild.getRank(), this.leftChild.getRank()) + 1;
         }
 
         public int getKey()
@@ -398,7 +424,7 @@ public class WAVLTree {
         // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
         public boolean isRealNode()
         {
-            return this.key == null;
+            return this.key != null;
         }
 
         public int getSubtreeSize()
@@ -411,32 +437,59 @@ public class WAVLTree {
         }
 
         public void setRight(IWAVLNode rightChild) {
-            this.setSubTreeSize(this.getSubtreeSize() - this.getRight().getSubtreeSize());
-            this.rightChild = rightChild;
-            this.setSubTreeSize(this.getSubtreeSize() + this.getRight().getSubtreeSize());
+            if (this.rightChild != null) {
+
+                this.setSubTreeSize(this.getSubtreeSize() - this.getRight().getSubtreeSize());
+                this.setRank(this.getRank() - this.getRight().getRank());
+                this.rightChild = rightChild;
+                this.setSubTreeSize(this.getSubtreeSize() + this.getRight().getSubtreeSize());
+                this.setRank(this.getRank() + this.getRight().getRank());
+            }
+            else {
+                this.rightChild = rightChild;
+            }
         }
 
         public void setLeft(IWAVLNode leftChild) {
-            this.setSubTreeSize(this.getSubtreeSize() - this.getLeft().getSubtreeSize());
-            this.leftChild = leftChild;
-            this.setSubTreeSize(this.getSubtreeSize() + this.getLeft().getSubtreeSize())
+            if (this.leftChild != null) {
+
+                this.setSubTreeSize(this.getSubtreeSize() - this.getLeft().getSubtreeSize());
+                this.setRank(this.getRank() - this.getLeft().getRank());
+                this.leftChild = leftChild;
+                this.setSubTreeSize(this.getSubtreeSize() + this.getLeft().getSubtreeSize());
+                this.setRank(this.getRank() + this.getLeft().getRank());
+            }
+            else {
+                this.leftChild = leftChild;
+            }
         }
 
         public void setSubTreeSize(Integer subTreeSize) {
             this.subTreeSize = subTreeSize;
         }
 
-    }
-
-    private class InsertReturnType {
-
-        public int rotationsNeeded;
-        public IWAVLNode resultNode;
-
-        public InsertReturnType(IWAVLNode resultNode, int rotationsNeeded) {
-            this.rotationsNeeded = rotationsNeeded;
-            this.resultNode = resultNode;
+        public void setRank(Integer rank) {
+            this.rank = rank;
         }
+
+        private int max(int x, int y) {
+            if (x > y) {
+                return x;
+            }
+            else { return y; }
+        }
+
     }
+// TODO: Delete if not needed at the end.
+//    private class InsertReturnType {
+//
+//        public int rotationsNeeded;
+//        public IWAVLNode resultNode;
+//
+//        public InsertReturnType(IWAVLNode resultNode, int rotationsNeeded) {
+//            this.rotationsNeeded = rotationsNeeded;
+//            this.resultNode = resultNode;
+//        }
+//    }
 
 }
