@@ -13,6 +13,12 @@ public class Tester {
 
         tree.insert(5, "5");
         tree.insert(6, "6");
+        tree.insert(7, "7");
+        System.out.println("Result: ");
+        System.out.println(tree.getRoot().getRight().getValue());
+        System.out.println(tree.getRoot().getLeft().getValue());
+        System.out.println("Root rank: " + tree.getRoot().getRank() + " subtree size: " + tree.getRoot().getSubtreeSize());
+
 
     }
 }
