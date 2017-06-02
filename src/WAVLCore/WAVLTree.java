@@ -30,6 +30,7 @@ public class WAVLTree {
      * <p>
      * returns the info of an item with key k if it exists in the tree
      * otherwise, returns null
+     * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public String search(int k) {
         IWAVLNode currentNode = root;
@@ -52,10 +53,11 @@ public class WAVLTree {
      * the tree must remain valid (keep its invariants).
      * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
      * returns -1 if an item with key k already exists in the tree.
+     * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public int insert(int k, String i) {
 
-        if (empty()) {
+        if (empty()) { // Create the root if the tree is empty
             root = new WAVLNode(k, i, null, null);
             System.out.println("Setting New Root");
             return 0;
@@ -63,6 +65,12 @@ public class WAVLTree {
         return recursiveInsert(root, new WAVLNode(k, i, null, null));
     }
 
+    /**
+     * Inserts newNode and re-balance tree
+     * @param tree The root of this current recursive insert call
+     * @param newNode The node to insert
+     * @return The number of rotations needed to re-balance the tree after the insert (double rotate is considered as 2 rotations)
+     */
     private int recursiveInsert(IWAVLNode tree, IWAVLNode newNode) {
 
         System.out.println("Calling Recursive Insert: " + newNode.getValue() + " With root: " + tree.getValue());
@@ -112,10 +120,10 @@ public class WAVLTree {
                 }
             }
         } else { // Already existing:
-            return 0;
+            return -1;
         }
 
-        if (isRoot) { // TODO: Move to outer insert to avoid if checking every recursive call
+        if (isRoot) {
             System.out.println("Assign " + tree.getValue() + " to root");
             this.root = tree;
         }
@@ -130,17 +138,19 @@ public class WAVLTree {
      * the tree must remain valid (keep its invariants).
      * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
      * returns -1 if an item with key k was not found in the tree.
+     * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public int delete(int k) {
-        return 42;    // to be replaced by student code
+
     }
 
-    // Rotation Methods:
+    // Helper Rotation Methods:
 
     /**
      * Performing a rotation with the left child of node.
      *
      * @return The new node(tree) after the rotation
+     * @complexity O(1)
      */
     private IWAVLNode leftRotate(IWAVLNode node) {
         IWAVLNode tempNode = node.getRight();
@@ -154,6 +164,7 @@ public class WAVLTree {
      * Performing a rotation with the right child of node.
      *
      * @return The new node(tree) after the rotation
+     * @complexity O(1)
      */
     private IWAVLNode rightRotate(IWAVLNode node) {
         IWAVLNode tempNode = node.getLeft();
@@ -167,6 +178,7 @@ public class WAVLTree {
      * Performing a double rotation with left child.
      *
      * @return The new node(tree) after the rotation
+     * @complexity O(1)
      */
     private IWAVLNode doubleRotateWithLeftChild(IWAVLNode node) {
         node.setLeft(rightRotate(node.getLeft()));
@@ -177,6 +189,7 @@ public class WAVLTree {
      * Performing a double rotation with right child.
      *
      * @return The new node(tree) after the rotation
+     * @complexity O(1)
      */
     private IWAVLNode doubleRotateWithRightChild(IWAVLNode node) {
         node.setRight(leftRotate(node.getRight()));
@@ -188,6 +201,7 @@ public class WAVLTree {
      * <p>
      * Returns the info of the item with the smallest key in the tree,
      * or null if the tree is empty
+     * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public String min() {
         if (empty()) {
@@ -206,6 +220,7 @@ public class WAVLTree {
      * <p>
      * Returns the info of the item with the largest key in the tree,
      * or null if the tree is empty
+     * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public String max() {
         if (empty()) {
@@ -219,6 +234,10 @@ public class WAVLTree {
         }
     }
 
+    /**
+     * @return the in-order traversal of this as an array
+     * @complexity O(n), where n is the number of nodes in this tree
+     */
     private IWAVLNode[] inOrderTraversal() {
 
         if (empty()) {
@@ -228,6 +247,9 @@ public class WAVLTree {
         return recursiveInOrderTraversal(new IWAVLNode[size()], root, 0);
     }
 
+    /**
+     * Continuing the in-order traversal from a given node with a given array of pre-inserted nodes.
+     */
     private IWAVLNode[] recursiveInOrderTraversal(IWAVLNode[] insertedNodes, IWAVLNode node, int numInsertedNodes) {
         if (!node.isRealNode()) {
             return insertedNodes;
@@ -247,6 +269,7 @@ public class WAVLTree {
      * <p>
      * Returns a sorted array which contains all keys in the tree,
      * or an empty array if the tree is empty.
+     * @complexity O(n), where n is the number of nodes in the tree. (calls inOrderTraversal).
      */
     public int[] keysToArray() {
         IWAVLNode[] nodes = inOrderTraversal();
@@ -263,6 +286,7 @@ public class WAVLTree {
      * Returns an array which contains all info in the tree,
      * sorted by their respective keys,
      * or an empty array if the tree is empty.
+     * @complexity O(n), where n is the number of nodes in the tree. (calls inOrderTraversal).
      */
     public String[] infoToArray() {
         IWAVLNode[] nodes = inOrderTraversal();
@@ -471,6 +495,9 @@ public class WAVLTree {
             this.rank = rank;
         }
 
+        /**
+         * @return the bigger between x and y
+         */
         private int max(int x, int y) {
             if (x > y) {
                 return x;
