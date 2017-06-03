@@ -50,6 +50,12 @@ public class WAVLTree {
         }
     }
 
+    /**
+     *
+     * returns the node with key k if it exists in the tree
+     * otherwise, returns null
+     * @complexity O(log(n)), where n is the number of nodes in the tree
+     */
     public IWAVLNode searchNode(int k) {
         IWAVLNode currentNode = root;
 
@@ -76,11 +82,11 @@ public class WAVLTree {
     public int insert(int k, String i) {
 
         if (empty()) { // Create the root if the tree is empty
-            root = new WAVLNode(k, i, null, null);
+            root = new WAVLNode(k, i, null, null, null);
             System.out.println("Setting New Root");
             return 0;
         }
-        return recursiveInsert(root, new WAVLNode(k, i, null, null));
+        return recursiveInsert(root, new WAVLNode(k, i, null, null, null));
     }
 
     /**
@@ -92,6 +98,7 @@ public class WAVLTree {
     private int recursiveInsert(IWAVLNode tree, IWAVLNode newNode) {
 
         System.out.println("Calling Recursive Insert: " + newNode.getValue() + " With root: " + tree.getValue());
+        System.out.println("" + newNode.getValue() + ": " + newNode.getRank() + ". " + tree.getKey() + ": " + tree.getRank());
 
         int k = newNode.getKey();
         int tk = tree.getKey();
@@ -111,9 +118,13 @@ public class WAVLTree {
                 if (k < tree.getLeft().getKey()) {
                     tree = rightRotate(tree);
                     numRotationsNeeded += 1;
+                    tree.getFather().setRank(tree.getFather().getRank() - 1);
                 } else {
                     tree = doubleRotateWithRightChild(tree);
                     numRotationsNeeded += 2;
+                    tree.getRight().setRank(tree.getRight().getRank() + 1);
+                    tree.setRank(tree.getRank() - 1);
+                    tree.getFather().setRank(tree.getFather().getRank() - 1);
                 }
             }
         } else if (k > tk) {
@@ -132,9 +143,14 @@ public class WAVLTree {
                 if (k > tree.getRight().getKey()) {
                     tree = leftRotate(tree);
                     numRotationsNeeded += 1;
+
+                    tree.getFather().setRank(tree.getFather().getRank() - 1);
                 } else {
                     tree = doubleRotateWithLeftChild(tree);
                     numRotationsNeeded += 2;
+                    tree.getLeft().setRank(tree.getLeft().getRank() + 1);
+                    tree.setRank(tree.getRank() - 1);
+                    tree.getFather().setRank(tree.getFather().getRank() - 1);
                 }
             }
         } else { // Already existing:
@@ -171,6 +187,9 @@ public class WAVLTree {
      * @complexity O(1)
      */
     private IWAVLNode leftRotate(IWAVLNode node) {
+
+        System.out.println("Left rotate with: " + node.getKey());
+
         IWAVLNode tempNode = node.getRight();
         node.setRight(tempNode.getLeft());
         tempNode.setLeft(node);
@@ -185,6 +204,10 @@ public class WAVLTree {
      * @complexity O(1)
      */
     private IWAVLNode rightRotate(IWAVLNode node) {
+
+        System.out.println("Right rotate with: " + node.getKey());
+
+
         IWAVLNode tempNode = node.getLeft();
         node.setLeft(tempNode.getRight());
         tempNode.setRight(node);
@@ -261,7 +284,7 @@ public class WAVLTree {
         if (empty()) {
             return new IWAVLNode[0];
         }
-
+        System.out.println("Tree size: " + size());
         return recursiveInOrderTraversal(new IWAVLNode[size()], root, 0);
     }
 
@@ -388,8 +411,11 @@ public class WAVLTree {
 
         public int getRank();
 
+        public void setRank(Integer rank);
+
         public IWAVLNode getFather();
 
+        public void setFather(IWAVLNode father);
     }
 
     /**
@@ -430,6 +456,10 @@ public class WAVLTree {
         private Integer rank;
 
         /**
+         * The father of this
+         */
+        private IWAVLNode father;
+        /**
          * For external leafs only.
          */
         private WAVLNode() {
@@ -437,7 +467,7 @@ public class WAVLTree {
             this.subTreeSize = 0;
         }
 
-        public WAVLNode(Integer key, String info, WAVLNode rightChild, WAVLNode leftChild) {
+        public WAVLNode(Integer key, String info, IWAVLNode rightChild, IWAVLNode leftChild, IWAVLNode father) {
 
             if (key == null) {
                 throw new IllegalArgumentException("Key cloud not be null");
@@ -458,6 +488,7 @@ public class WAVLTree {
             this.key = key;
             this.subTreeSize = this.rightChild.getSubtreeSize() + this.leftChild.getSubtreeSize() + 1;
             this.rank = max(this.rightChild.getRank(), this.leftChild.getRank()) + 1;
+            this.father = father;
         }
 
         public int getKey() {
@@ -500,26 +531,32 @@ public class WAVLTree {
         }
 
         public void setRight(IWAVLNode rightChild) {
+
+            rightChild.setFather(this);
+
             if (this.rightChild != null) {
 
                 this.setSubTreeSize(this.getSubtreeSize() - this.getRight().getSubtreeSize());
-                this.setRank(this.getRank() - this.getRight().getRank());
+                //this.setRank(this.getRank() - this.getRight().getRank());
                 this.rightChild = rightChild;
                 this.setSubTreeSize(this.getSubtreeSize() + this.getRight().getSubtreeSize());
-                this.setRank(this.getRank() + this.getRight().getRank());
+                //this.setRank(this.getRank() + this.getRight().getRank());
             } else {
                 this.rightChild = rightChild;
             }
         }
 
         public void setLeft(IWAVLNode leftChild) {
+
+            leftChild.setFather(this);
+
             if (this.leftChild != null) {
 
                 this.setSubTreeSize(this.getSubtreeSize() - this.getLeft().getSubtreeSize());
-                this.setRank(this.getRank() - this.getLeft().getRank());
+                //this.setRank(this.getRank() - this.getLeft().getRank());
                 this.leftChild = leftChild;
                 this.setSubTreeSize(this.getSubtreeSize() + this.getLeft().getSubtreeSize());
-                this.setRank(this.getRank() + this.getLeft().getRank());
+                //this.setRank(this.getRank() + this.getLeft().getRank());
             } else {
                 this.leftChild = leftChild;
             }
@@ -533,10 +570,14 @@ public class WAVLTree {
             this.rank = rank;
         }
 
-        // TODO: Delete
-        public WAVLNode getFather() {
-            return new WAVLNode();
+        public IWAVLNode getFather() {
+            return this.father;
         }
+
+        public void setFather(IWAVLNode father) {
+            this.father = father;
+        }
+
         /**
          * @return the bigger between x and y
          */
