@@ -5,19 +5,31 @@ import WAVLCore.WAVLTree;
  */
 public class Tester {
 
+
+    public void testWAVLTreeClass() {}
+
     public static void main(String[] args) {
 
         WAVLTree tree = new WAVLTree();
 
-        // Preform tests:
+        boolean testClass = true; // Should we test the class functionality or the asymptotic performance
 
-        tree.insert(5, "5");
-        tree.insert(6, "6");
-        tree.insert(7, "7");
-        System.out.println("Result: ");
-        System.out.println(tree.getRoot().getRight().getValue());
-        System.out.println(tree.getRoot().getLeft().getValue());
-        System.out.println("Root rank: " + tree.getRoot().getRank() + " subtree size: " + tree.getRoot().getSubtreeSize());
+        // WAVLTree Test:
+
+        if (testClass) {
+
+            WAVLClassTester tester = new WAVLClassTester();
+            try {
+                tester.run(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        else { // Tests to submit
+            AsymptoticTests tester = new AsymptoticTests();
+            tester.run();
+        }
 
 
     }

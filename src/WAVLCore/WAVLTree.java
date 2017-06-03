@@ -10,10 +10,17 @@ import com.sun.javaws.exceptions.InvalidArgumentException;
  * distinct integer keys and info
  *
  */
-
 public class WAVLTree {
 
+    /**
+     * The root node of the tree, in an empty tree this is null.
+     */
     private IWAVLNode root = null;
+
+    /**
+     * An external leaf to be used
+     */
+    private final WAVLNode externalLeaf = new WAVLNode();
 
     /**
      * public boolean empty()
@@ -33,6 +40,17 @@ public class WAVLTree {
      * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public String search(int k) {
+
+        IWAVLNode node = searchNode(k);
+        if (node != null) {
+            return node.getValue();
+        }
+        else {
+            return null;
+        }
+    }
+
+    public IWAVLNode searchNode(int k) {
         IWAVLNode currentNode = root;
 
         while (currentNode.isRealNode())
@@ -41,7 +59,7 @@ public class WAVLTree {
             else if (currentNode.getKey() < k)
                 currentNode = currentNode.getRight();
             else
-                return currentNode.getValue(); // Match
+                return currentNode; // Match
 
         return null; // No match
     }
@@ -141,7 +159,7 @@ public class WAVLTree {
      * @complexity O(log(n)), where n is the number of nodes in the tree
      */
     public int delete(int k) {
-
+        return 42;
     }
 
     // Helper Rotation Methods:
@@ -370,6 +388,8 @@ public class WAVLTree {
 
         public int getRank();
 
+        public IWAVLNode getFather();
+
     }
 
     /**
@@ -382,16 +402,32 @@ public class WAVLTree {
      * (It must implement IWAVLNode)
      */
 
-    static class WAVLNode implements IWAVLNode {
+    public class WAVLNode implements IWAVLNode {
 
+        /**
+         * The right child of this if exists
+         */
         private IWAVLNode rightChild;
+        /**
+         * The left child of this if exists
+         */
         private IWAVLNode leftChild;
+        /**
+         * The info (String) of this
+         */
         private String info;
+        /**
+         * The key (Integer) of this
+         */
         private Integer key;
+        /**
+         * The number of nodes in the tree defined by this as its root.
+         */
         private Integer subTreeSize;
+        /**
+         * The rank of this
+         */
         private Integer rank;
-
-        private static WAVLNode externalLeaf = new WAVLNode();
 
         /**
          * For external leafs only.
@@ -408,12 +444,12 @@ public class WAVLTree {
             }
 
             if (rightChild == null) {
-                this.rightChild = WAVLNode.externalLeaf;
+                this.rightChild = WAVLTree.this.externalLeaf;
             } else {
                 this.rightChild = rightChild;
             }
             if (leftChild == null) {
-                this.leftChild = WAVLNode.externalLeaf;
+                this.leftChild = WAVLTree.this.externalLeaf;
             } else {
                 this.leftChild = leftChild;
             }
@@ -448,7 +484,9 @@ public class WAVLTree {
             return this.rightChild;
         }
 
-        // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
+        /**
+         * @return True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
+         */
         public boolean isRealNode() {
             return this.key != null;
         }
@@ -495,6 +533,10 @@ public class WAVLTree {
             this.rank = rank;
         }
 
+        // TODO: Delete
+        public WAVLNode getFather() {
+            return new WAVLNode();
+        }
         /**
          * @return the bigger between x and y
          */
