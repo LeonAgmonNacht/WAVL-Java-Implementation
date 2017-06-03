@@ -59,13 +59,23 @@ public class WAVLTree {
     public IWAVLNode searchNode(int k) {
         IWAVLNode currentNode = root;
 
+        if (root == null) { return null; };
+
         while (currentNode.isRealNode())
-            if (currentNode.getKey() < k)
+            if (k == currentNode.getKey()) { // Match
+                return currentNode;
+
+            } else if (k < currentNode.getKey()) {
+
+                if (!currentNode.getLeft().isRealNode()) return currentNode;
                 currentNode = currentNode.getLeft();
-            else if (currentNode.getKey() < k)
+
+            } else {
+
+                if (!currentNode.getRight().isRealNode()) return currentNode;
                 currentNode = currentNode.getRight();
-            else
-                return currentNode; // Match
+
+            }
 
         return null; // No match
     }
@@ -81,88 +91,147 @@ public class WAVLTree {
      */
     public int insert(int k, String i) {
 
-        if (empty()) { // Create the root if the tree is empty
-            root = new WAVLNode(k, i, null, null, null);
-            System.out.println("Setting New Root");
+        // Create the root if the tree is empty:
+
+        if (empty()) {
+            root = new WAVLNode(k, i, null, null, null); // External leaf, no father.
+            //System.out.println("Setting New Root");
             return 0;
         }
-        return recursiveInsert(root, new WAVLNode(k, i, null, null, null));
+
+       // System.out.println("Insert: " + k + " with root: " + root.getKey());
+
+        // Find the father of the insert point:
+
+        IWAVLNode father = searchNode(k);
+        int fatherKey = father.getKey();
+        if (k == fatherKey) return -1; // Already exists
+
+        // Create the new node
+        IWAVLNode newNode = new WAVLNode(k, i, null, null, father);
+
+        if (k < fatherKey) {
+            father.setLeft(newNode);
+        } else {
+            father.setRight(newNode);
+        }
+
+        father.reSetSubtreeSize();
+
+        // Re-balance tree if needed:
+        return insertRebalance(newNode);
     }
 
     /**
-     * Inserts newNode and re-balance tree
-     * @param tree The root of this current recursive insert call
-     * @param newNode The node to insert
-     * @return The number of rotations needed to re-balance the tree after the insert (double rotate is considered as 2 rotations)
+     * Re-balance the tree defined by node after an insert.
+     * returns the number of re-balancing operations preformed.
+     * @complexity O(log(n)), where n is the number of nodes in this
      */
-    private int recursiveInsert(IWAVLNode tree, IWAVLNode newNode) {
+    private int insertRebalance(IWAVLNode node) {
 
-        System.out.println("Calling Recursive Insert: " + newNode.getValue() + " With root: " + tree.getValue());
-        System.out.println("" + newNode.getValue() + ": " + newNode.getRank() + ". " + tree.getKey() + ": " + tree.getRank());
-
-        int k = newNode.getKey();
-        int tk = tree.getKey();
-        int numRotationsNeeded = 0;
-        boolean isRoot = this.root == tree;
-
-        if (k < tk) {
-
-            if (tree.getLeft().isRealNode()) {
-                numRotationsNeeded = recursiveInsert(tree.getLeft(), newNode);
-            } else {
-                tree.setLeft(newNode);
-            }
-            if (tree.getLeft().getRank() - tree.getRight().getRank() == 2) { // Left is deeper, need rotation
-
-                // Need Rotation:
-                if (k < tree.getLeft().getKey()) {
-                    tree = rightRotate(tree);
-                    numRotationsNeeded += 1;
-                    tree.getFather().setRank(tree.getFather().getRank() - 1);
-                } else {
-                    tree = doubleRotateWithRightChild(tree);
-                    numRotationsNeeded += 2;
-                    tree.getRight().setRank(tree.getRight().getRank() + 1);
-                    tree.setRank(tree.getRank() - 1);
-                    tree.getFather().setRank(tree.getFather().getRank() - 1);
-                }
-            }
-        } else if (k > tk) {
-
-            if (tree.getRight().isRealNode()) {
-                numRotationsNeeded = recursiveInsert(tree.getRight(), newNode);
-            } else {
-                tree.setRight(newNode);
-                System.out.println("No Real Right. Setting to: " + tree.getValue() + " Right Child: " + newNode.getValue());
-            }
-            if (tree.getRight().getRank() - tree.getLeft().getRank() == 2) { // Right is deeper, need rotation
-
-                System.out.println("Need Rotation For new node: " + newNode.getValue());
-
-                // Need Rotation:
-                if (k > tree.getRight().getKey()) {
-                    tree = leftRotate(tree);
-                    numRotationsNeeded += 1;
-
-                    tree.getFather().setRank(tree.getFather().getRank() - 1);
-                } else {
-                    tree = doubleRotateWithLeftChild(tree);
-                    numRotationsNeeded += 2;
-                    tree.getLeft().setRank(tree.getLeft().getRank() + 1);
-                    tree.setRank(tree.getRank() - 1);
-                    tree.getFather().setRank(tree.getFather().getRank() - 1);
-                }
-            }
-        } else { // Already existing:
-            return -1;
+        if (node.getFather() == null) { // Root, no need to re-balance.
+            node.reSetSubtreeSize();
+            return 0;
         }
 
-        if (isRoot) {
-            System.out.println("Assign " + tree.getValue() + " to root");
-            this.root = tree;
+        IWAVLNode father = node.getFather();
+
+        // No need to re-balance since the new inserted node is with a legit rank:
+
+        if(father.getRank() != node.getRank()) {
+            reSetSubTreeSizeOfTree(node); // Terminal case, set subtree size all the way to root.
+            return 0;
         }
 
-        return numRotationsNeeded;
+        int fatherRankDif = Math.abs(
+                (father.getRank() - father.getLeft().getRank()) -
+                (father.getRank() - father.getRight().getRank()));
+
+//        System.out.println("FRD: " + fatherRankDif + " " + father.getKey() + " " + father.getRight().getKey() + " " + father.getLeft().getKey());
+//        System.out.println("FRD: " + fatherRankDif + " " + father.getRank() + " " + father.getRight().getRank() + " " + father.getLeft().getRank());
+
+        if (fatherRankDif == 1) { // Case 1: Promote.
+
+            //System.out.println("Promote with: " + node.getKey());
+
+            father.setRank(father.getRank() + 1);
+            father.reSetSubtreeSize();
+
+            return 1 + insertRebalance(father);
+        }
+
+        else if (fatherRankDif == 2) {
+
+            int nodeRankDif =
+                    (node.getRank() - node.getLeft().getRank()) - (node.getRank() - node.getRight().getRank());
+
+            //System.out.println(nodeRankDif + " " + father.getKey() + " " + node.getKey());
+
+            if ((node == father.getRight() && nodeRankDif == 1) || (node == father.getLeft() && nodeRankDif == -1)) { //Case 2: Single rotate
+
+                if (node == father.getRight()) { // Right Child, rotate left
+                    leftRotate(node);
+                } else {
+                    rightRotate(node);
+                }
+
+                // Update Rank, terminal case:
+
+                father.setRank(father.getRank() - 1);
+
+                reSetSubTreeSizeOfTree(node); // Terminal case, set subtree size all the way to root.
+
+                //System.out.println("Rotate with: " + node.getKey());
+
+                return 1;
+
+            } else { // Case 3: Double rotate.
+
+                if (node == father.getRight()) { // Right Child, double rotate left
+
+                    IWAVLNode leftChild = node.getLeft();
+                    doubleRotateWithLeftChild(leftChild);
+                    leftChild.setRank(leftChild.getRank() + 1);
+
+                    //System.out.println("Double rotate with: " + node.getKey());
+
+                } else { // Left child, double rotate right
+
+                    IWAVLNode rightChild = node.getRight();
+                    doubleRotateWithRightChild(rightChild);
+                    rightChild.setRank(rightChild.getRank() + 1);
+
+                    //System.out.println("Double rotate with: " + node.getKey());
+
+                }
+
+                // Update ranks:
+
+                node.setRank(node.getRank() - 1);
+                father.setRank(father.getRank() - 1);
+
+                reSetSubTreeSizeOfTree(node); // Terminal case, set subtree size all the way to root.
+
+                return 2;
+
+            }
+        }
+
+        return -1; // Can't get here...
+    }
+
+    /**
+     * Recursively resetting the subtree size starting from node going up until te root
+     * @Complexity O(log(n)), where n is the number of nodes in this
+     */
+    private void reSetSubTreeSizeOfTree(IWAVLNode node) {
+        IWAVLNode currentNode = node;
+        while (currentNode.getKey() != root.getKey()) {
+            currentNode.reSetSubtreeSize();
+            //System.out.println("Resetting subtree size: " + currentNode.getSubtreeSize());
+            currentNode = currentNode.getFather();
+        }
+        currentNode.reSetSubtreeSize();
     }
 
     /**
@@ -186,16 +255,40 @@ public class WAVLTree {
      * @return The new node(tree) after the rotation
      * @complexity O(1)
      */
-    private IWAVLNode leftRotate(IWAVLNode node) {
+    private void leftRotate(IWAVLNode node) {
 
-        System.out.println("Left rotate with: " + node.getKey());
+        IWAVLNode father = node.getFather();
+        IWAVLNode grandfather = father.getFather();
+        IWAVLNode leftChild =  node.getLeft();
 
-        IWAVLNode tempNode = node.getRight();
-        node.setRight(tempNode.getLeft());
-        tempNode.setLeft(node);
+        if (father == root) {
+            root = node;
+        }
 
-        return tempNode;
+        if (grandfather != null) {
+            if (grandfather.getRight() == father) {
+                grandfather.setRight(node);
+            } else {
+                grandfather.setLeft(node);
+            }
+        }
+        node.setFather(grandfather);
+        node.setLeft(father);
+
+        father.setFather(node);
+        father.setRight(leftChild);
+
+        if (leftChild.isRealNode()) {
+            leftChild.setFather(father);
+        }
+
+        // Re-set subtree size:
+
+        father.reSetSubtreeSize();
+        node.reSetSubtreeSize();
+        if (grandfather != null) { grandfather.reSetSubtreeSize(); }
     }
+
 
     /**
      * Performing a rotation with the right child of node.
@@ -203,16 +296,39 @@ public class WAVLTree {
      * @return The new node(tree) after the rotation
      * @complexity O(1)
      */
-    private IWAVLNode rightRotate(IWAVLNode node) {
+    private void rightRotate(IWAVLNode node) {
 
-        System.out.println("Right rotate with: " + node.getKey());
+        IWAVLNode father = node.getFather();
+        IWAVLNode grandfather = father.getFather();
+        IWAVLNode rightChild = node.getRight();
 
+        if (father == root) {
+            root = node;
+        }
 
-        IWAVLNode tempNode = node.getLeft();
-        node.setLeft(tempNode.getRight());
-        tempNode.setRight(node);
+        if (grandfather != null) {
+            if (grandfather.getRight() == father) {
+                grandfather.setRight(node);
+            } else {
+                grandfather.setLeft(node);
+            }
+        }
+        node.setFather(grandfather);
+        node.setRight(father);
 
-        return tempNode;
+        father.setFather(node);
+        father.setLeft(rightChild);
+
+        if (rightChild.isRealNode()) {
+            rightChild.setFather(father);
+        }
+
+        // Re-set subtree size:
+
+        father.reSetSubtreeSize();
+        node.reSetSubtreeSize();
+        if (grandfather != null) { grandfather.reSetSubtreeSize(); }
+
     }
 
     /**
@@ -221,9 +337,9 @@ public class WAVLTree {
      * @return The new node(tree) after the rotation
      * @complexity O(1)
      */
-    private IWAVLNode doubleRotateWithLeftChild(IWAVLNode node) {
-        node.setLeft(rightRotate(node.getLeft()));
-        return leftRotate(node);
+    private void doubleRotateWithLeftChild(IWAVLNode node) {
+        rightRotate(node);
+        leftRotate(node);
     }
 
     /**
@@ -232,9 +348,11 @@ public class WAVLTree {
      * @return The new node(tree) after the rotation
      * @complexity O(1)
      */
-    private IWAVLNode doubleRotateWithRightChild(IWAVLNode node) {
-        node.setRight(leftRotate(node.getRight()));
-        return rightRotate(node);
+    private void doubleRotateWithRightChild(IWAVLNode node) {
+        //System.out.println("DR: " + node.getFather().getFather().getRight().getKey());
+        leftRotate(node);
+        rightRotate(node);
+        //System.out.println("DR: " + node.getLeft().getKey());
     }
 
     /**
@@ -249,7 +367,7 @@ public class WAVLTree {
             return null;
         } else {
             IWAVLNode node = root;
-            while (node.getLeft() != null) {
+            while (node.getLeft().isRealNode()) {
                 node = node.getLeft();
             }
             return node.getValue();
@@ -268,7 +386,7 @@ public class WAVLTree {
             return null;
         } else {
             IWAVLNode node = root;
-            while (node.getRight() != null) {
+            while (node.getRight().isRealNode()) {
                 node = node.getRight();
             }
             return node.getValue();
@@ -285,23 +403,25 @@ public class WAVLTree {
             return new IWAVLNode[0];
         }
         System.out.println("Tree size: " + size());
-        return recursiveInOrderTraversal(new IWAVLNode[size()], root, 0);
+        IWAVLNode[] inOrder = new IWAVLNode[size()];
+        recursiveInOrderTraversal(inOrder, root, 0);
+        return inOrder;
     }
 
     /**
      * Continuing the in-order traversal from a given node with a given array of pre-inserted nodes.
      */
-    private IWAVLNode[] recursiveInOrderTraversal(IWAVLNode[] insertedNodes, IWAVLNode node, int numInsertedNodes) {
+    private int recursiveInOrderTraversal(IWAVLNode[] insertedNodes, IWAVLNode node, int numInsertedNodes) {
         if (!node.isRealNode()) {
-            return insertedNodes;
+            return numInsertedNodes;
         }
-
-        insertedNodes = recursiveInOrderTraversal(insertedNodes, node.getLeft(), numInsertedNodes);
-        numInsertedNodes += 1;
+        //System.out.println(node.getKey());
+        numInsertedNodes = recursiveInOrderTraversal(insertedNodes, node.getLeft(), numInsertedNodes);
         insertedNodes[numInsertedNodes] = node;
-        insertedNodes = recursiveInOrderTraversal(insertedNodes, node.getRight(), numInsertedNodes);
+        numInsertedNodes += 1;
+        numInsertedNodes = recursiveInOrderTraversal(insertedNodes, node.getRight(), numInsertedNodes);
 
-        return insertedNodes;
+        return numInsertedNodes;
     }
 
 
@@ -416,6 +536,8 @@ public class WAVLTree {
         public IWAVLNode getFather();
 
         public void setFather(IWAVLNode father);
+
+        public void reSetSubtreeSize();
     }
 
     /**
@@ -486,7 +608,7 @@ public class WAVLTree {
 
             this.info = info;
             this.key = key;
-            this.subTreeSize = this.rightChild.getSubtreeSize() + this.leftChild.getSubtreeSize() + 1;
+            reSetSubtreeSize();
             this.rank = max(this.rightChild.getRank(), this.leftChild.getRank()) + 1;
             this.father = father;
         }
@@ -532,34 +654,12 @@ public class WAVLTree {
 
         public void setRight(IWAVLNode rightChild) {
 
-            rightChild.setFather(this);
-
-            if (this.rightChild != null) {
-
-                this.setSubTreeSize(this.getSubtreeSize() - this.getRight().getSubtreeSize());
-                //this.setRank(this.getRank() - this.getRight().getRank());
-                this.rightChild = rightChild;
-                this.setSubTreeSize(this.getSubtreeSize() + this.getRight().getSubtreeSize());
-                //this.setRank(this.getRank() + this.getRight().getRank());
-            } else {
-                this.rightChild = rightChild;
-            }
+            this.rightChild = rightChild;
         }
 
         public void setLeft(IWAVLNode leftChild) {
 
-            leftChild.setFather(this);
-
-            if (this.leftChild != null) {
-
-                this.setSubTreeSize(this.getSubtreeSize() - this.getLeft().getSubtreeSize());
-                //this.setRank(this.getRank() - this.getLeft().getRank());
-                this.leftChild = leftChild;
-                this.setSubTreeSize(this.getSubtreeSize() + this.getLeft().getSubtreeSize());
-                //this.setRank(this.getRank() + this.getLeft().getRank());
-            } else {
-                this.leftChild = leftChild;
-            }
+            this.leftChild = leftChild;
         }
 
         public void setSubTreeSize(Integer subTreeSize) {
@@ -576,6 +676,14 @@ public class WAVLTree {
 
         public void setFather(IWAVLNode father) {
             this.father = father;
+        }
+
+        /**
+         * Resetting the subtree size var according to the right and the left children
+         * @Complexity O(1)
+         */
+        public void reSetSubtreeSize() {
+            this.setSubTreeSize(getRight().getSubtreeSize() + getLeft().getSubtreeSize() + 1);
         }
 
         /**

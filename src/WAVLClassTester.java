@@ -41,6 +41,7 @@ public class WAVLClassTester {
             }
         }
         System.out.println("all elements were inserted to the tree\n##Testing ranks and ranks differences one last time!! XDDDDD");
+        printTree();
         RankTest(0);		//Calls rank test method (Insert version)
 
         System.out.println("done inserting nodes!..");
