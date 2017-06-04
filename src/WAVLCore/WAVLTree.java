@@ -470,7 +470,6 @@ public class WAVLTree {
         WAVLNode secondNodeLeftBeforeSwitch = secondNode.getRealLeft();
         WAVLNode secondNodeAncestorBeforeSwitch = secondNode.getFather();
 
-        // Attaching firstNode's sons to secondNode with attention if secondNode is firstNode's son, avoid circular pointers
         if (firstNode.getRight() != null && firstNode.getLeft() != null) {
             secondNode.setRank(firstNode.getRank());
             if (firstNode.getRealLeft() != secondNode) {
@@ -490,7 +489,7 @@ public class WAVLTree {
                     } else {
                         secondNodeAncestorBeforeSwitch.setRight(null);
                     }
-                } else if (!secondNodeLeftBeforeSwitch.isRealNode() && !secondNodeRightBeforeSwitch.isRealNode()) {
+                } else if (secondNodeLeftBeforeSwitch.isRealNode() && !secondNodeRightBeforeSwitch.isRealNode()) {
                     if (secondNode.isLeftChild()) {
                         secondNodeAncestorBeforeSwitch.setLeft(secondNodeLeftBeforeSwitch);
                         secondNodeLeftBeforeSwitch.setFather(secondNodeAncestorBeforeSwitch);
@@ -498,7 +497,7 @@ public class WAVLTree {
                         secondNodeAncestorBeforeSwitch.setRight(secondNodeLeftBeforeSwitch);
                         secondNodeLeftBeforeSwitch.setFather(secondNodeAncestorBeforeSwitch);
                     }
-                } else if (!secondNodeLeftBeforeSwitch.isRealNode() && !secondNodeRightBeforeSwitch.isRealNode()) {
+                } else if (!secondNodeLeftBeforeSwitch.isRealNode() && secondNodeRightBeforeSwitch.isRealNode()) {
                     if (secondNode.isLeftChild()) {
                         secondNodeAncestorBeforeSwitch.setLeft(secondNodeRightBeforeSwitch);
                         secondNodeRightBeforeSwitch.setFather(secondNodeAncestorBeforeSwitch);
