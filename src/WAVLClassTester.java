@@ -10,7 +10,7 @@ import java.util.List;
 import WAVLCore.WAVLTree;
 
 public class WAVLClassTester {
-    public ArrayList<WAVLTree.IWAVLNode> leafs=new ArrayList<WAVLTree.IWAVLNode>();
+    public ArrayList<WAVLTree.WAVLNode> leafs=new ArrayList<WAVLTree.WAVLNode>();
     public WAVLTree generatedTree;
     public int totalInsertRebalances;
     public int totalDeleteRebalances;
@@ -30,6 +30,7 @@ public class WAVLClassTester {
                 i--;
                 continue;
             }
+
             keysInTree.add(randomNumber);
             numberOfRebalances = generatedTree.insert(randomNumber, Integer.toString(randomNumber));
             totalInsertRebalances=numberOfRebalances>0 ? totalInsertRebalances+numberOfRebalances : totalInsertRebalances;
@@ -58,7 +59,7 @@ public class WAVLClassTester {
     public void initialize(){
         this.generatedTree=null;
         this.keysInTree=new ArrayList<Integer>();
-        this.leafs=new ArrayList<WAVLTree.IWAVLNode>();
+        this.leafs=new ArrayList<WAVLTree.WAVLNode>();
         this.totalDeleteRebalances=0;
         this.totalInsertRebalances=0;
     }
@@ -146,10 +147,10 @@ public class WAVLClassTester {
     }
 
     public void createLeafList(){
-        leafs=new ArrayList<WAVLTree.IWAVLNode>();
+        leafs=new ArrayList<WAVLTree.WAVLNode>();
         int[] array=generatedTree.keysToArray();
         for(int i:array){
-            WAVLTree.IWAVLNode node = generatedTree.searchNode(i);
+            WAVLTree.WAVLNode node = generatedTree.searchNode(i);
             if(node.getKey()==i&&node.getLeft()==null&&node.getRight()==null)
                 leafs.add(node);
         }
@@ -160,12 +161,12 @@ public class WAVLClassTester {
         boolean RanksTest=true;
         boolean RankDifferenceTest=true;
         if(i==1){
-            for(WAVLTree.IWAVLNode node:leafs){
+            for(WAVLTree.WAVLNode node:leafs){
                 RanksTest=RanksTest&&RanksTest(node);
                 RankDifferenceTest=RankDifferenceTest&&RankDifferenceTest(node);
             }
         }else if(i==0){
-            for(WAVLTree.IWAVLNode node:leafs){
+            for(WAVLTree.WAVLNode node:leafs){
                 RanksTest=RanksTest&&RanksTestInsertOnly(node);
                 RankDifferenceTest=RankDifferenceTest&&RankDifferenceTest(node);
             }
@@ -182,7 +183,7 @@ public class WAVLClassTester {
     }
 
 
-    public boolean RankDifferenceTest(WAVLTree.IWAVLNode node){
+    public boolean RankDifferenceTest(WAVLTree.WAVLNode node){
         while(node!=null){
             int leftDiff=node.getLeft()!=null ? node.getRank()-node.getLeft().getRank() : node.getRank()+1;
             int rightDiff=node.getRight()!=null ? node.getRank()-node.getRight().getRank() : node.getRank()+1;
@@ -197,7 +198,7 @@ public class WAVLClassTester {
     //Ranks test, regular version!
     //In regular version the method check whether each node's rank is max(node.left,node.right)+1 or max(node.left,node.right)+2
 
-    public boolean RanksTest(WAVLTree.IWAVLNode node){
+    public boolean RanksTest(WAVLTree.WAVLNode node){
         while(node!=null){
             int leftChildsRank=node.getLeft()!=null?node.getLeft().getRank():-1;
             int rightChildsRank=node.getRight()!=null?node.getRight().getRank():-1;
@@ -210,7 +211,7 @@ public class WAVLClassTester {
     }
     //Ranks test, insert-only version!
     //In insert only version the method check whether each node's rank is max(node.left,node.right)+1
-    public boolean RanksTestInsertOnly(WAVLTree.IWAVLNode node){
+    public boolean RanksTestInsertOnly(WAVLTree.WAVLNode node){
         while(node!=null){
             int leftChildsRank=node.getLeft()!=null?node.getLeft().getRank():-1;
             int rightChildsRank=node.getRight()!=null?node.getRight().getRank():-1;
@@ -298,7 +299,7 @@ public class WAVLClassTester {
     }
 
     public void run(boolean shuffle) throws Exception {
-        runTest(20,100,0,shuffle);
+        runTest(25,100,0,shuffle);
         initialize();
         for(int i=1;i<=10;i++){
             runTest(i*10000, i*500000, i,shuffle);
@@ -309,14 +310,14 @@ public class WAVLClassTester {
     class TreePrint {
 
         public <T extends Comparable<?>> void printNode(
-                WAVLTree.IWAVLNode root) {
+                WAVLTree.WAVLNode root) {
             int maxLevel = maxLevel(root);
 
             printNodeInternal(Collections.singletonList(root), 1, maxLevel);
         }
 
         private <T extends Comparable<?>> void printNodeInternal(
-                List<WAVLTree.IWAVLNode> list, int level, int maxLevel) {
+                List<WAVLTree.WAVLNode> list, int level, int maxLevel) {
             if (list.isEmpty() || isAllElementsNull(list))
                 return;
 
@@ -327,8 +328,8 @@ public class WAVLClassTester {
 
             printWhitespaces(firstSpaces);
 
-            List<WAVLTree.IWAVLNode> newNodes = new ArrayList<WAVLTree.IWAVLNode>();
-            for (WAVLTree.IWAVLNode node : list) {
+            List<WAVLTree.WAVLNode> newNodes = new ArrayList<WAVLTree.WAVLNode>();
+            for (WAVLTree.WAVLNode node : list) {
                 if (node != null) {
                     System.out.print(node.getKey());
                     newNodes.add(node.getLeft());
@@ -374,14 +375,14 @@ public class WAVLClassTester {
         }
 
         public <T extends Comparable<?>> void printNodeRank(
-                WAVLTree.IWAVLNode root) {
+                WAVLTree.WAVLNode root) {
             int maxLevel = maxLevel(root);
 
             printNodeInternalRank(Collections.singletonList(root), 1, maxLevel);
         }
 
         private <T extends Comparable<?>> void printNodeInternalRank(
-                List<WAVLTree.IWAVLNode> list, int level, int maxLevel) {
+                List<WAVLTree.WAVLNode> list, int level, int maxLevel) {
             if (list.isEmpty() || isAllElementsNull(list))
                 return;
 
@@ -392,8 +393,8 @@ public class WAVLClassTester {
 
             printWhitespaces(firstSpaces);
 
-            List<WAVLTree.IWAVLNode> newNodes = new ArrayList<WAVLTree.IWAVLNode>();
-            for (WAVLTree.IWAVLNode node : list) {
+            List<WAVLTree.WAVLNode> newNodes = new ArrayList<WAVLTree.WAVLNode>();
+            for (WAVLTree.WAVLNode node : list) {
                 if (node != null) {
                     System.out.print(node.getRank());
                     newNodes.add(node.getLeft());
@@ -443,10 +444,9 @@ public class WAVLClassTester {
                 System.out.print(" ");
         }
 
-        private <T extends Comparable<?>> int maxLevel(WAVLTree.IWAVLNode root) {
+        private <T extends Comparable<?>> int maxLevel(WAVLTree.WAVLNode root) {
             if (root == null)
                 return 0;
-
             return Math.max(maxLevel(root.getLeft()),
                     maxLevel(root.getRight())) + 1;
         }

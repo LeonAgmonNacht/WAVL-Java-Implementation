@@ -34,19 +34,24 @@ public class Tester {
 //            AsymptoticTests tester = new AsymptoticTests();
 //            tester.run();
 
-            tree.insert(49, "49");
-            tree.insert(78, "78");
-            tree.insert(65, "65");
-            tree.insert(85, "85");
-
-            tree.insert(13, "13");
             TreePrint p = new TreePrint();
+
+            tree.insert(56, "56");
+            tree.insert(51, "51");
+            tree.insert(27, "27");
+            tree.insert(70, "70");
+            tree.insert(35, "35");
+
             p.printNode(tree.getRoot());
 
-            tree.insert(25, "25");
-            tree.insert(89, "89");
+            tree.delete(51);
+            tree.delete(56);
+            p.printNode(tree.getRoot());
+            tree.delete(35);
 
-            tree.insert(8, "8");
+
+
+            p.printNode(tree.getRoot());
 
         }
 
@@ -55,14 +60,14 @@ public class Tester {
     static class TreePrint {
 
         public <T extends Comparable<?>> void printNode(
-                WAVLTree.IWAVLNode root) {
+                WAVLTree.WAVLNode root) {
             int maxLevel = maxLevel(root);
 
             printNodeInternal(Collections.singletonList(root), 1, maxLevel);
         }
 
         private <T extends Comparable<?>> void printNodeInternal(
-                List<WAVLTree.IWAVLNode> list, int level, int maxLevel) {
+                List<WAVLTree.WAVLNode> list, int level, int maxLevel) {
             if (list.isEmpty() || isAllElementsNull(list))
                 return;
 
@@ -73,8 +78,8 @@ public class Tester {
 
             printWhitespaces(firstSpaces);
 
-            List<WAVLTree.IWAVLNode> newNodes = new ArrayList<WAVLTree.IWAVLNode>();
-            for (WAVLTree.IWAVLNode node : list) {
+            List<WAVLTree.WAVLNode> newNodes = new ArrayList<WAVLTree.WAVLNode>();
+            for (WAVLTree.WAVLNode node : list) {
                 if (node != null) {
                     System.out.print(node.getKey());
                     newNodes.add(node.getLeft());
@@ -120,14 +125,14 @@ public class Tester {
         }
 
         public <T extends Comparable<?>> void printNodeRank(
-                WAVLTree.IWAVLNode root) {
+                WAVLTree.WAVLNode root) {
             int maxLevel = maxLevel(root);
 
             printNodeInternalRank(Collections.singletonList(root), 1, maxLevel);
         }
 
         private <T extends Comparable<?>> void printNodeInternalRank(
-                List<WAVLTree.IWAVLNode> list, int level, int maxLevel) {
+                List<WAVLTree.WAVLNode> list, int level, int maxLevel) {
             if (list.isEmpty() || isAllElementsNull(list))
                 return;
 
@@ -138,8 +143,8 @@ public class Tester {
 
             printWhitespaces(firstSpaces);
 
-            List<WAVLTree.IWAVLNode> newNodes = new ArrayList<WAVLTree.IWAVLNode>();
-            for (WAVLTree.IWAVLNode node : list) {
+            List<WAVLTree.WAVLNode> newNodes = new ArrayList<WAVLTree.WAVLNode>();
+            for (WAVLTree.WAVLNode node : list) {
                 if (node != null) {
                     System.out.print(node.getRank());
                     newNodes.add(node.getLeft());
@@ -189,9 +194,10 @@ public class Tester {
                 System.out.print(" ");
         }
 
-        private <T extends Comparable<?>> int maxLevel(WAVLTree.IWAVLNode root) {
+        private <T extends Comparable<?>> int maxLevel(WAVLTree.WAVLNode root) {
             if (root == null)
                 return 0;
+            System.out.print("Max Level: " + root.getKey() + " " + root.getRealLeft().getKey() + " ||| ");
 
             return Math.max(maxLevel(root.getLeft()),
                     maxLevel(root.getRight())) + 1;
