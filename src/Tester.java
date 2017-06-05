@@ -16,7 +16,7 @@ public class Tester {
 
         WAVLTree tree = new WAVLTree();
 
-        boolean testClass = false; // Should we test the class functionality or the asymptotic performance
+        boolean testClass = true; // Should we test the class functionality or the asymptotic performance
 
         // WAVLTree Test:
 

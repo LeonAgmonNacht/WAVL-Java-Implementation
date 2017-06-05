@@ -3,12 +3,10 @@ package WAVLCore;
 import com.sun.javaws.exceptions.InvalidArgumentException;
 
 /**
- *
  * WAVLTree
- *
+ * <p>
  * An implementation of a WAVL Tree with
  * distinct integer keys and info
- *
  */
 public class WAVLTree {
 
@@ -26,7 +24,8 @@ public class WAVLTree {
      * public boolean empty()
      * <p>
      * returns true if and only if the tree is empty
-     * @Complexity O(1)
+     *
+     * Complexity O(1)
      */
 
     public boolean empty() {
@@ -38,29 +37,32 @@ public class WAVLTree {
      * <p>
      * returns the info of an item with key k if it exists in the tree
      * otherwise, returns null
-     * @Complexity O(log(n)), where n is the number of nodes in the tree (calls searchNode).
+     *
+     * Complexity O(log(n)), where n is the number of nodes in the tree (calls searchNode).
      */
     public String search(int k) {
 
         WAVLNode node = searchNode(k);
         if (node != null) {
             return node.getValue();
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     /**
-     *
      * returns the node with key k if it exists in the tree
      * otherwise, returns null
-     * @complexity O(log(n)), where n is the number of nodes in the tree (travels all the way to a node in the w.c).
+     *
+     * Complexity O(log(n)), where n is the number of nodes in the tree (travels all the way to a node in the w.c).
      */
     public WAVLNode searchNode(int k) {
         WAVLNode currentNode = root;
 
-        if (root == null) { return null; };
+        if (root == null) {
+            return null;
+        }
+        ;
 
         while (currentNode.isRealNode())
             if (k == currentNode.getKey()) { // Match
@@ -88,7 +90,8 @@ public class WAVLTree {
      * the tree must remain valid (keep its invariants).
      * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
      * returns -1 if an item with key k already exists in the tree.
-     * @complexity O(log(n)), where n is the number of nodes in the tree (calls searchNode, insertRebalance).
+     *
+     * Complexity O(log(n)), where n is the number of nodes in the tree (calls searchNode, insertRebalance).
      */
     public int insert(int k, String i) {
 
@@ -123,8 +126,9 @@ public class WAVLTree {
     /**
      * Re-balance the tree defined by node after an insert.
      * returns the number of re-balancing operations preformed.
-     * @complexity O(log(n)), where n is the number of nodes in this (in w.c we promote until the root, we also
-     * need to adjust the subtree size in O(log(n)).
+     *
+     * Complexity O(d), where d is the depth of node (in w.c we promote until the root, we also
+     * need to adjust the subtree size in O(d), calls reSetSubTreeSizeOfTree. it's also O(log(n)) because d = O(log(n))
      */
     private int insertRebalance(WAVLNode node) {
 
@@ -137,7 +141,7 @@ public class WAVLTree {
 
         // No need to re-balance since the new inserted node is with a legit rank:
 
-        if(father.getRank() != node.getRank()) {
+        if (father.getRank() != node.getRank()) {
             reSetSubTreeSizeOfTree(node); // Terminal case, set subtree size all the way to root.
             return 0;
         }
@@ -150,9 +154,7 @@ public class WAVLTree {
             father.reSetSubtreeSize();
 
             return 1 + insertRebalance(father);
-        }
-
-        else if (fatherRankDif == 2) {
+        } else if (fatherRankDif == 2) {
 
             int nodeRankDif = (node.getRankDifferenceFromLeft()) - (node.getRankDifferenceFromRight());
 
@@ -205,7 +207,8 @@ public class WAVLTree {
 
     /**
      * Recursively resetting the subtree size starting from node going up until te root
-     * @Complexity O(log(n)), where n is the number of nodes in this
+     *
+     * Complexity O(log(k)), where k is the depth of the node
      */
     private void reSetSubTreeSizeOfTree(WAVLNode node) {
         WAVLNode currentNode = node;
@@ -223,7 +226,8 @@ public class WAVLTree {
      * the tree must remain valid (keep its invariants).
      * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
      * returns -1 if an item with key k was not found in the tree.
-     * @complexity O(log(n)), where n is the number of nodes in the tree (calls deleteNode)
+     *
+     * complexity O(log(n)), where n is the number of nodes in the tree (calls deleteNode,searchNode)
      */
     public int delete(int k) {
         WAVLNode nodeToDelete = searchNode(k);
@@ -238,7 +242,7 @@ public class WAVLTree {
     /**
      * @param wavlNode the node to delete
      * @return the number of rebalancing operations, or 0 if no rebalancing operations were needed.
-     * @complexity O(log(n)), where n is the number of nodes in the tree (calls postDeletionRebalancing, getSuccessor).
+     * complexity O(log(n)), where n is the number of nodes in the tree (calls postDeletionRebalancing, getSuccessor).
      */
     public int deleteNode(WAVLNode wavlNode) {
 
@@ -280,8 +284,8 @@ public class WAVLTree {
      *
      * @param node the node to rebalance the wavl tree from
      * @return the number of rebalancing operations
-     * @complexity O(log(n)), where n is the number of nodes in this tree. (in the w.c we will travel all the way to the root
-     * preforming O(1) operations in each step).
+     * complexity O(log(n)), where n is the number of nodes in this tree. (in the w.c we will travel all the way to the root
+     * preforming O(1) operations in each step)
      */
     private int postDeletionRebalancing(WAVLNode node) {
 
@@ -395,8 +399,9 @@ public class WAVLTree {
 
     /**
      * checking base cases for rebalancing leafs
+     *
      * @return the number of rebalancing operations needed
-     * @complexity O(log(n)), where n is the number of nodes in the tree. (might call postDeletionRebalancing)
+     * Ccomplexity O(log(n)), where n is the number of nodes in the tree. (might call postDeletionRebalancing)
      */
     private Integer postDeletionRebalancingForLeaf(WAVLNode node) {
         if (node.getRankDifferenceFromLeft() == 2 && node.getRankDifferenceFromRight() == 2) {
@@ -411,7 +416,8 @@ public class WAVLTree {
      *
      * @param node a node to find successor to
      * @return successor to a given node, null if it doesn't have one(largest key in tree)
-     * @complexity O(log(n)), where n is the number of nodes in this. might traverse all the way to root.
+     * Complexity O(d), where d is the depth, which is also O(log(n)) because d=O(log(n))
+     * . might traverse all the way to root.
      */
     private WAVLNode getSuccessor(WAVLNode node) {
         if (node == null) {
@@ -451,10 +457,8 @@ public class WAVLTree {
      * the function place secondNode in place of firstNode according to the algorithm presented to us in class.
      * and from that can be derived we treat correctly only the following cases:
      * firstNode is Unary or firstNode is Binary and secondNode is either unary or a leaf.
-     * @complexity O(1).
-     */
-    /**
-     * we replace a node with other node. we use this for deleting
+     * complexity O(1).
+     *
      *
      * @param firstNode  the node to replace(unary or binary)
      * @param secondNode the node to replace with(unary or leaf)
@@ -526,13 +530,13 @@ public class WAVLTree {
      * Performing a rotation with the left child of node.
      *
      * @return The new node(tree) after the rotation
-     * @complexity O(1)
+     * complexity O(1)
      */
     private void leftRotate(WAVLNode node) {
 
         WAVLNode father = node.getFather();
         WAVLNode grandfather = father.getFather();
-        WAVLNode leftChild =  node.getRealLeft();
+        WAVLNode leftChild = node.getRealLeft();
 
         if (father == root) {
             root = node;
@@ -559,7 +563,9 @@ public class WAVLTree {
 
         father.reSetSubtreeSize();
         node.reSetSubtreeSize();
-        if (grandfather != null) { grandfather.reSetSubtreeSize(); }
+        if (grandfather != null) {
+            grandfather.reSetSubtreeSize();
+        }
     }
 
 
@@ -567,7 +573,7 @@ public class WAVLTree {
      * Performing a rotation with the right child of node.
      *
      * @return The new node(tree) after the rotation
-     * @complexity O(1)
+     * complexity O(1)
      */
     private void rightRotate(WAVLNode node) {
 
@@ -600,7 +606,9 @@ public class WAVLTree {
 
         father.reSetSubtreeSize();
         node.reSetSubtreeSize();
-        if (grandfather != null) { grandfather.reSetSubtreeSize(); }
+        if (grandfather != null) {
+            grandfather.reSetSubtreeSize();
+        }
 
     }
 
@@ -608,7 +616,7 @@ public class WAVLTree {
      * Performing a double rotation with left child.
      *
      * @return The new node(tree) after the rotation
-     * @complexity O(1)
+     * complexity O(1)
      */
     private void doubleRotateWithLeftChild(WAVLNode node) {
         rightRotate(node);
@@ -619,7 +627,7 @@ public class WAVLTree {
      * Performing a double rotation with right child.
      *
      * @return The new node(tree) after the rotation
-     * @complexity O(1)
+     * complexity O(1)
      */
     private void doubleRotateWithRightChild(WAVLNode node) {
         leftRotate(node);
@@ -631,7 +639,8 @@ public class WAVLTree {
      * <p>
      * Returns the info of the item with the smallest key in the tree,
      * or null if the tree is empty
-     * @complexity O(log(n)), where n is the number of nodes in the tree
+     *
+     * complexity O(log(n)), where n is the number of nodes in the tree
      */
     public String min() {
         if (empty()) {
@@ -650,7 +659,8 @@ public class WAVLTree {
      * <p>
      * Returns the info of the item with the largest key in the tree,
      * or null if the tree is empty
-     * @complexity O(log(n)), where n is the number of nodes in the tree
+     *
+     * complexity O(log(n)), where n is the number of nodes in the tree
      */
     public String max() {
         if (empty()) {
@@ -666,7 +676,7 @@ public class WAVLTree {
 
     /**
      * @return the in-order traversal of this as an array
-     * @complexity O(n), where n is the number of nodes in this tree.
+     * complexity O(n), where n is the number of nodes in this tree, calss recursiveInOrderTraversal
      */
     private WAVLNode[] inOrderTraversal() {
 
@@ -680,6 +690,7 @@ public class WAVLTree {
 
     /**
      * Continuing the in-order traversal from a given node with a given array of pre-inserted nodes.
+     * Complexity: O(k) where k is number of items in the subtree of node
      */
     private int recursiveInOrderTraversal(WAVLNode[] insertedNodes, WAVLNode node, int numInsertedNodes) {
         if (!node.isRealNode()) {
@@ -700,7 +711,8 @@ public class WAVLTree {
      * <p>
      * Returns a sorted array which contains all keys in the tree,
      * or an empty array if the tree is empty.
-     * @complexity O(n), where n is the number of nodes in the tree. (calls inOrderTraversal).
+     *
+     * complexity O(n), where n is the number of nodes in the tree. (calls inOrderTraversal).
      */
     public int[] keysToArray() {
         WAVLNode[] nodes = inOrderTraversal();
@@ -717,7 +729,8 @@ public class WAVLTree {
      * Returns an array which contains all info in the tree,
      * sorted by their respective keys,
      * or an empty array if the tree is empty.
-     * @complexity O(n), where n is the number of nodes in the tree. (calls inOrderTraversal).
+     *
+     * complexity O(n), where n is the number of nodes in the tree. (calls inOrderTraversal).
      */
     public String[] infoToArray() {
         WAVLNode[] nodes = inOrderTraversal();
@@ -735,6 +748,7 @@ public class WAVLTree {
      * <p>
      * precondition: none
      * postcondition: none
+     * Complexity:O(1)
      */
     public int size() {
         return root.getSubtreeSize();
@@ -747,6 +761,7 @@ public class WAVLTree {
      * <p>
      * precondition: none
      * postcondition: none
+     * Complexity:O(1)
      */
     public WAVLNode getRoot() {
         return root;
@@ -762,11 +777,19 @@ public class WAVLTree {
      * <p>
      * precondition: size() >= i > 0
      * postcondition: none
+     * Complexity: O(log(n)) where n is the number of nodes in tree, calls recursiveSelect
      */
     public String select(int i) {
         return recursiveSelect(root, i).getValue();
     }
 
+    /**
+     * get i smallest node in node's subtree
+     * @param node the node we do the select from it's subtree
+     * @param i the i smallest in the subtree from node
+     * @return the i smallest node in node's subtree
+     * complexity:O(log(k)) where k is the subtree size of node
+     */
     private WAVLNode recursiveSelect(WAVLNode node, int i) {
         int r = node.getRealLeft().getSubtreeSize();
         if (i == r) {
@@ -782,12 +805,17 @@ public class WAVLTree {
      * public interface IWAVLNode
      * ! Do not delete or modify this - otherwise all tests will fail !
      */
-    public interface IWAVLNode{
+    public interface IWAVLNode {
         public int getKey(); //returns node's key (for virtuval node return -1)
+
         public String getValue(); //returns node's value [info] (for virtuval node return null)
+
         public IWAVLNode getLeft(); //returns left child (if there is no left child return null)
+
         public IWAVLNode getRight(); //returns right child (if there is no right child return null)
+
         public boolean isRealNode(); // Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
+
         public int getSubtreeSize(); // Returns the number of real nodes in this node's subtree (Should be implemented in O(1))
     }
 
@@ -832,6 +860,7 @@ public class WAVLTree {
          * The father of this
          */
         private WAVLNode father;
+
         /**
          * For external leafs only.
          */
@@ -840,6 +869,15 @@ public class WAVLTree {
             this.subTreeSize = 0;
         }
 
+        /**
+         * wavlnode constructor
+         * @param key key of node
+         * @param info info of node
+         * @param rightChild right child of node
+         * @param leftChild left child of node
+         * @param father father of node
+         * Complexity:O(1)
+         */
         public WAVLNode(Integer key, String info, WAVLNode rightChild, WAVLNode leftChild, WAVLNode father) {
 
             if (key == null) {
@@ -914,44 +952,82 @@ public class WAVLTree {
             return this.key != null;
         }
 
+        /**
+         * get sub tree size
+         * @return sub tree size
+         * complexity:O(1)
+         */
         public int getSubtreeSize() {
             return subTreeSize;
         }
 
+
+        /**
+         * get rank
+         * @return rank
+         * complexity:O(1)
+         */
         public int getRank() {
             return this.rank;
         }
 
+        /**
+         * set right
+         * @param rightChild the right child to set,if null is set we will use externalleaf for representing it in our
+         *                   code for convinience
+         *  Complexity:O(1)
+         *
+         */
         public void setRight(WAVLNode rightChild) {
 
             if (rightChild == null) {
                 this.rightChild = externalLeaf;
-            }
-            else {
+            } else {
                 this.rightChild = rightChild;
             }
         }
 
+        /**
+         * setting the left child of node
+         * @param leftChild the left child
+         * Complexity O(1)
+         */
         public void setLeft(WAVLNode leftChild) {
             if (leftChild == null) {
                 this.leftChild = externalLeaf;
-            }
-            else {
+            } else {
                 this.leftChild = leftChild;
             }
         }
 
+        /**
+         * set sub tree size
+         * @param subTreeSize the sub tree size
+         *  Complexity O(1)
+         */
         public void setSubTreeSize(Integer subTreeSize) {
             this.subTreeSize = subTreeSize;
         }
 
+        /**
+         * set rank
+         * @param rank
+         * Complexity O(1)
+         */
         public void setRank(Integer rank) {
             this.rank = rank;
         }
 
+
+        /**
+         * get node's father
+         * @return node's father
+         * Complexity:O(1)
+         */
         public WAVLNode getFather() {
             return this.father;
         }
+
 
         public void setFather(WAVLNode father) {
             this.father = father;
@@ -959,6 +1035,7 @@ public class WAVLTree {
 
         /**
          * @return boolean to tell if the node is leaf or not
+         *
          */
         public boolean isLeaf() {
             return ((getLeft() == null) && (getRight() == null));
@@ -977,6 +1054,7 @@ public class WAVLTree {
          * check if node is a right child
          *
          * @return true if a node is a right child, false if it's not
+         * Complexity:O(1)
          */
         public boolean isRightChild() {
             return ((this.getFather() != null) && (this.getFather().getRight() == this));
@@ -986,6 +1064,7 @@ public class WAVLTree {
          * get rank difference from right node
          *
          * @return rank difference from right node
+         * Complexity:O(1)
          */
         private int getRankDifferenceFromRight() {
             return this.getRank() - this.getRealRight().getRank();
@@ -995,6 +1074,7 @@ public class WAVLTree {
          * get rank difference from left node
          *
          * @return rank  difference from left node
+         * Complexity:O(1)
          */
         private int getRankDifferenceFromLeft() {
             return this.getRank() - this.getRealLeft().getRank();
@@ -1002,7 +1082,8 @@ public class WAVLTree {
 
         /**
          * Resetting the subtree size var according to the right and the left children
-         * @Complexity O(1)
+         *
+         * Complexity O(1)
          */
         public void reSetSubtreeSize() {
             this.setSubTreeSize(getRealRight().getSubtreeSize() + getRealLeft().getSubtreeSize() + 1);
@@ -1010,6 +1091,7 @@ public class WAVLTree {
 
         /**
          * @return the bigger between x and y
+         * Complexity O(1)
          */
         private int max(int x, int y) {
             if (x > y) {
