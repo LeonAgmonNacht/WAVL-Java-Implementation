@@ -268,21 +268,20 @@ public class WAVLTree {
             WAVLNode successor = getSuccessor(wavlNode);
             WAVLNode successorAncestor = successor.getFather();
             replaceWith(wavlNode, successor); // replace successor with node to delete and balance
-            //System.out.println("asdfasdfasdfasdf: " + successorAncestor.getKey() + " " + wavlNode.getKey());
             if (successorAncestor == wavlNode) {
-                //System.out.println(root.getKey() + " " + root.getRealLeft().getKey() + " " + successor.getKey());
                 return postDeletionRebalancing(successor); // rebalancing from successor in case the node deleted was his ancestor
             }
             return postDeletionRebalancing(successorAncestor); // rebalancing tree from successor's ancestor
         }
     }
 
-    // TODO: add complexity docs.
     /**
      * rebalance the tree after deletion from a certain point matching the ways we showed at class
      *
      * @param node the node to rebalance the wavl tree from
      * @return the number of rebalancing operations
+     * @complexity O(log(n)), where n is the number of nodes in this tree. (in the w.c we will travel all the way to the root
+     * preforming O(1) operations in each step).
      */
     private int postDeletionRebalancing(WAVLNode node) {
 
@@ -290,11 +289,9 @@ public class WAVLTree {
             return 0;
         }
 
-        //System.out.println("Here3: " + node.getKey());
         // Leaf has rank of 0, rank differences must be 1,1
         if (node.isLeaf()) {
-            //System.out.println("Here4: " + node.getKey());
-            Integer x = postDeletionRebalancingForNode(node);
+            Integer x = postDeletionRebalancingForLeaf(node);
             if (x != null) {
                 reSetSubTreeSizeOfTree(node);
                 return x;
@@ -308,7 +305,6 @@ public class WAVLTree {
         }
 
         // Needs rebalancing.
-        //System.out.println("Here 6:");
         // Left rank difference == 3
         if (node.getRankDifferenceFromLeft() == 3) {
 
@@ -353,10 +349,8 @@ public class WAVLTree {
                 }
             }
         } else { // Right rank difference == 3
-            //System.out.println("Here 7:");
 
             if (node.getRankDifferenceFromLeft() == 2) {// Demote
-                //System.out.println("Here 8:");
                 node.setRank(node.getRank() - 1);
                 node.reSetSubtreeSize();
                 return 1 + postDeletionRebalancing(node.getFather());
@@ -396,13 +390,15 @@ public class WAVLTree {
                 }
             }
         }
-        //System.out.println("Here2: " + node.getKey());
         return 0;
     }
 
-    // TODO: add docs.
-
-    private Integer postDeletionRebalancingForNode(WAVLNode node) {
+    /**
+     * checking base cases for rebalancing leafs
+     * @return the number of rebalancing operations needed
+     * @complexity O(log(n)), where n is the number of nodes in the tree. (might call postDeletionRebalancing)
+     */
+    private Integer postDeletionRebalancingForLeaf(WAVLNode node) {
         if (node.getRankDifferenceFromLeft() == 2 && node.getRankDifferenceFromRight() == 2) {
             node.setRank(node.getRank() - 1);
             return 1 + postDeletionRebalancing(node.getFather());
@@ -448,7 +444,6 @@ public class WAVLTree {
         return null;
     }
 
-    // TODO: add complexity docs
     /**
      * private void replaceWith(WAVLNode firstNode, WAVLNode secondNode)
      * replace a node with another node
@@ -456,6 +451,7 @@ public class WAVLTree {
      * the function place secondNode in place of firstNode according to the algorithm presented to us in class.
      * and from that can be derived we treat correctly only the following cases:
      * firstNode is Unary or firstNode is Binary and secondNode is either unary or a leaf.
+     * @complexity O(1).
      */
     /**
      * we replace a node with other node. we use this for deleting

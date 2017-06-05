@@ -1,5 +1,7 @@
 import WAVLCore.WAVLTree;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -19,47 +21,40 @@ public class AsymptoticTests {
         }
 
         public static void run() {
-            WAVLTree tree = new WAVLTree();
-            int j = 100000;
-            int num;
-            int sum = 0;
-            int max = 0;
-            int temp = 0;
-            for (int i = 0; i < j; i++) {
-                num = -10000000 + (int)(Math.random() * ((10000000 + 10000000) + 1));
-                temp = tree.insert(num, Integer.toString(num));
-                sum += temp;
-                max = Integer.max(max, temp);
-            }
-            System.out.println("number of tests: " + j + " total balancing: " + sum + " avg: " + (float)sum/j + " max: " + max);
 
-            sum = 0;
-            max = 0;
-            temp = 0;
+            for (int testIndex = 1; testIndex <= 10; testIndex++) {
 
-            int[] array = new int[tree.size()];
-            array = tree.keysToArray();
+                System.out.println("Test index: " + testIndex);
+                WAVLTree tree = new WAVLTree();
+                int j = 10000 * testIndex;
+                int num;
+                int sum = 0;
+                int max = 0;
+                int temp = 0;
+                for (int i = 0; i < j; i++) {
+                    num = -10000000 + (int) (Math.random() * ((10000000 + 10000000) + 1));
+                    temp = tree.insert(num, Integer.toString(num));
+                    sum += temp;
+                    max = Integer.max(max, temp);
+                }
+                System.out.println((float) sum / j + ", " + max);
 
-            ShuffleArray(array);
+                System.out.println("");
 
-            for (int i = 0; i < array.length; i++) {
-                temp = tree.delete(array[i]);
-                sum += temp;
-                max = Integer.max(max, temp);
-                System.out.println(i);
+                sum = 0;
+                max = 0;
+                temp = 0;
 
-            }
-            System.out.println("number of tests: " + j + " total balancing: " + sum + " avg: " + (float)sum/j + " max: " + max);
-        }
+                int[] array = new int[tree.size()];
+                array = tree.keysToArray();
 
-        public static void ShuffleArray(int[] array) {
-            int index, temp;
-            Random random = new Random();
-            for (int i = array.length - 1; i > 0; i--) {
-                index = random.nextInt(i + 1);
-                temp = array[index];
-                array[index] = array[i];
-                array[i] = temp;
+                for (int i = 0; i < array.length; i++) {
+                    temp = tree.delete(array[i]);
+                    sum += temp;
+                    max = Integer.max(max, temp);
+
+                }
+                System.out.println((float) sum / j + ", " + max);
             }
         }
 }
